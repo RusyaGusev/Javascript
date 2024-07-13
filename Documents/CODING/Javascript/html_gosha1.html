@@ -108,9 +108,8 @@
          // you should mess with this part.
          //
          function Main(newExpr) {
-            let expr = newExpr.match(/\d+|[+\-*\/]/g) || [];
+            let expr = newExpr.match(/\d+|[+\-*\/e]/g) || [];
             let number = [];
-            const hasE = newExpr.includes('e');
 
             if (expr.length === 0) {
                 Say("0");
@@ -137,8 +136,10 @@
                             number.push(a / b);
                             break;
                         case "e":
-                            c = a-b
-                            number.push(2.71828 * c)
+                            let c = a-b
+                            number.push(Math.pow(2.71828, c))
+                            break;
+                            // should work
                     }
                 }
             }
@@ -154,7 +155,7 @@
             return true;
         }
         function Say(result) {
-             viewController.setOutput(result)
+            viewController.setOutput(result);
         }
          //
          // ////////////////////////////////////////////////////////////
