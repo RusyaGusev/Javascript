@@ -107,6 +107,7 @@
          // ////////////////////////////////////////////////////////////
          // you should mess with this part.
          //
+
          function Main(newExpr) {
             let expr = newExpr.match(/\d+|[+\-*\/e]/g) || [];
             let number = [];
@@ -119,8 +120,15 @@
                 if (!isNaN(expr[i]) && isFinite(expr[i])) {
                     number.push(parseFloat(expr[i]));
                 } else {
-                    let b = number.pop();
-                    let a = number.pop();
+                    let a,b;
+                    if (expr[i] === "e") {
+                        a = number.pop()
+                        b = number.length ? number.pop() : 0;
+                    } else {
+                       let a = number.pop();
+                       let b = number.pop();
+
+                    }
 
                     switch (expr[i]) {
                         case "+":
@@ -136,10 +144,8 @@
                             number.push(a / b);
                             break;
                         case "e":
-                            let c = a-b
-                            number.push(Math.pow(2.71828, c))
+                            number.push(Math.pow(2.71828, a-b))
                             break;
-                            // should work
                     }
                 }
             }
