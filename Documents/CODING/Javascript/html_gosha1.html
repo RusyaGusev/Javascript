@@ -108,121 +108,128 @@
          // you should mess with this part.
          //
          function cleaningInput(newExpr) {
-             return newExpr.match(/\d+(\.\d+)?|[+\-*/()e]|\s+/g).filter(token => token.trim() !== '').join('');
-         }
+    return newExpr.match(/\d+(\.\d+)?|[+\-*/()e]|\s+/g).filter(token => token.trim() !== '').join('');
+}
 
-         function exprTokens(expr) {
-             return expr.match(/\d+(\.\d+)?|[+\-*/()e]/g) || [];
-         }
-         function solvingRPN(tokens) {
-             let stack = [];
-             tokens.forEach(token => {
-                 if (!isNaN(token)) {
-                     stack.push(parseFloat(token));
-                 } else {
-                     let a, b;
-                     a = stack.pop();
-                     b = stack.length ? stack.pop() : 0;
-                     switch (token) {
-                         case '+': stack.push(a + b); break;
-                         case '-': stack.push(a - b); break;
-                         case '*': stack.push(a * b); break;
-                         case '/': stack.push(a / b); break;
-                         case 'e': stack.push(Math.pow(2.7181, a - b)); break;
-                         default: Say(Error('Operator Not Supported'))
-                     }
-                 }
-             });
-             if (stack.length > 1) {
-                 return new Error('Not enough operators');
-             } else {
-                 return stack[0];
-             }
-         }
+function exprTokens(expr) {
+    return expr.match(/\d+(\.\d+)?|[+\-*/()e]/g) || [];
+}
 
-        function solvingInfix(tokens) {
-             const result = [];
-             const operator = [];
-
-             function operators() {
-                 const operator = operators.pop();
-                 const b = result.pop();
-                 const a = result.pop();
-
-                 switch (operator) {
-                     case '+': result.push(a + b); break;
-                     case '-': result.push(a - b); break;
-                     case '*': result.push(a * b); break;
-                     case '/': result.push(a / b); break;
-                     case 'e': result.push(Math.pow(2.7181, a - b)); break;
-                     default: Say(Error('Operator Not Supported'))
-                 }
-             }
-
-             tokens.forEach(token => {
-                 if (!isNaN(token)) {
-                     result.push(parseFloat(token));
-                 } else if (token === '(') {
-                     operator.push(token);
-                 } else if (token === ')') {
-                     while (operator.length && operator[operator.length - 1] !== '(') {
-                         applyOperator();
-                     }
-                     operator.pop();
-                 } else if (['+', '-', '*', '/', 'e'].includes(token)) {
-                     operator.push(token);
-                 }
-             });
-
-             while (operators.length) {
-                 applyOperator();
-             }
-
-             return result[0];
-        }
-        function solveBrackets(tokens) {
-             let bracketExpr = [];
-             let stack = [];
-
-             tokens.forEach(token => {
-                 if (token === '(') {
-                     stack.push(bracketExpr);
-                     bracketExpr = [];
-                 } else if (token === ')') {
-                     let result = solvingInfix(bracketExpr);
-                     bracketExpr = stack.pop();
-                     bracketExpr.push(result);
-                 } else {
-                     bracketExpr.push(token);
-                 }
-             });
-             return bracketExpr;
-        }
-
-         function Main(newExpr) {
-            const Expr = cleaningInput(newExpr);
-            const tokens = exprTokens(Expr);
-
-            const bracketExpr = tokens.includes('(') || tokens.includes(')') ? solveBrackets(tokens) : tokens;
-            const lastToken = bracketExpr[bracketExpr.length - 1];
-            let solution;
-
-            if (['+', '-', '*', '/', 'e'].includes(lastToken)) {
-                solution = solvingRPN(bracketExpr);
-            } else {
-                solution = solvingInfix(bracketExpr);
+function solvingRPN(tokens) {
+    let stack = [];
+    tokens.forEach(token => {
+        if (!isNaN(token)) {
+            stack.push(parseFloat(token));
+        } else {
+            let a, b;
+            a = stack.pop();
+            b = stack.length ? stack.pop() : 0;
+            switch (token) {
+                case '+': stack.push(a + b); break;
+                case '-': stack.push(a - b); break;
+                case '*': stack.push(a * b); break;
+                case '/': stack.push(a / b); break;
+                case 'e': stack.push(Math.pow(2.7181, a - b)); break;
+                default: return new Error('Operator Not Supported');
             }
-
-            Say(solution);
         }
+    });
+    if (stack.length !== 1) {
+        return new Error('Not enough operators');
+    } else {
+        return stack[0];
+    }
+}
 
-        function Say(result) {
-            viewController.setOutput(result);
-        }
+function solvingInfix(tokens) {
+    const result = [];
+    const operators = [];
 
-        function afterLoaded() {
-            return true;
+    function applyOperator() {
+        const operator = operators.pop();
+        const b = result.pop();
+        const a = result.pop();
+
+        switch (operator) {
+            case '+': result.push(a + b); break;
+            case '-': result.push(a - b); break;
+            case '*': result.push(a * b); break;
+            case '/': result.push(a / b); break;
+            case 'e': result.push(Math.pow(2.7181, a - b)); break;
+            default: return new Error('Operator Not Supported');
         }
+    }
+
+    tokens.forEach(token => {
+        if (!isNaN(token)) {
+            result.push(parseFloat(token));
+        } else if (token === '(') {
+            operators.push(token);
+        } else if (token === ')') {
+            while (operators.length && operators[operators.length - 1] !== '(') {
+                applyOperator();
+            }
+            operators.pop(); // Remove the '('
+        } else if (['+', '-', '*', '/', 'e'].includes(token)) {
+            // Apply operators until the stack is empty or we find a lower precedence operator
+            while (operators.length && ['+', '-', '*', '/'].includes(operators[operators.length - 1])) {
+                applyOperator();
+            }
+            operators.push(token);
+        }
+    });
+
+    // Apply remaining operators
+    while (operators.length) {
+        applyOperator();
+    }
+
+    return result[0];
+}
+
+function solveBrackets(tokens) {
+    let bracketExpr = [];
+    let stack = [];
+
+    tokens.forEach(token => {
+        if (token === '(') {
+            stack.push(bracketExpr);
+            bracketExpr = [];
+        } else if (token === ')') {
+            let result = solvingInfix(bracketExpr);
+            bracketExpr = stack.pop();
+            bracketExpr.push(result);
+        } else {
+            bracketExpr.push(token);
+        }
+    });
+    return bracketExpr;
+}
+
+function Main(newExpr) {
+    const Expr = cleaningInput(newExpr);
+    const tokens = exprTokens(Expr);
+
+    const bracketExpr = tokens.includes('(') || tokens.includes(')') ? solveBrackets(tokens) : tokens;
+    const lastToken = bracketExpr[bracketExpr.length - 1];
+    let solution;
+
+    if (['+', '-', '*', '/', 'e'].includes(lastToken)) {
+        solution = solvingRPN(bracketExpr);
+    } else {
+        solution = solvingInfix(bracketExpr);
+    }
+
+    Say(solution);
+}
+
+function Say(result) {
+    viewController.setOutput(result);
+}
+
+function afterLoaded() {
+    return true;
+}
          //
          // ////////////////////////////////////////////////////////////
         </script>
