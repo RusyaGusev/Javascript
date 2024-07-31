@@ -130,7 +130,6 @@
                          case '*': stack.push(b * a); break;
                          case '/': stack.push(b / a); break;
                          case 'e': stack.push(Math.pow(2.7181, b - a)); break;
-                         default: return new Error('Operator Not Supported');
                      }
                  }
              });
@@ -156,7 +155,6 @@
                      case '*': result.push(a * b); break;
                      case '/': result.push(a / b); break;
                      case 'e': result.push(Math.pow(2.7181, a - b)); break;
-                     default: return new Error('Operator Not Supported');
                  }
              }
 
