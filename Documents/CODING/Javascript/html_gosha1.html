@@ -143,7 +143,17 @@
          function solvingInfix(tokens) {
              const result = [];
              const operators = [];
-
+             //const operatorPrecedence = {'e': 3, '*': 2, '/': 2, '+': 1, '-': 1};
+             function getPrecedence(operator) {
+                 switch (operator) {
+                     case 'e': return 3;
+                     case '*':
+                     case '/': return 2;
+                     case '+':
+                     case '-': return 1;
+                     default: return 0;
+                 }
+             }
              function applyOperator() {
                  const operator = operators.pop();
                  const b = result.pop();
@@ -169,7 +179,8 @@
                      }
                      operators.pop();
                  } else if (['+', '-', '*', '/', 'e'].includes(token)) {
-                     while (operators.length && operators[operators.length - 1] !== '(') {
+                     while (operators.length && operators[operators.length - 1] !== '(' &&
+                     getPrecedence(operators[operators.length - 1]) >= getPrecedence(token)) {
                          applyOperator();
                      }
                      operators.push(token);
