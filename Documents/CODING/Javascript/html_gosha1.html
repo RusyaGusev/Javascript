@@ -129,7 +129,7 @@
                          case '-': stack.push(b - a); break;
                          case '*': stack.push(b * a); break;
                          case '/': stack.push(b / a); break;
-                         case 'e': stack.push(Math.pow(2.7181, b - a)); break;
+
                      }
                  }
              });
@@ -139,11 +139,27 @@
                  return stack[0];
              }
          }
+         function applyE(tokens) {
+             const allTokens = [];
+             let i = 0;
+             while (i < tokens.length) {
+                 if (tokens[i] === 'e' && !isNaN(tokens[i + 1])) {
+                     const base = 2.7181;
+                     const exponent = parseFloat(tokens[i + 1]);
+                     allTokens.push(Math.pow(base, exponent).toString());
+                     i += 2;
+                 } else {
+                     allTokens.push(tokens[i]);
+                     i++;
+                 }
+             }
 
+             return allTokens;
+         }
          function solvingInfix(tokens) {
              const result = [];
              const operators = [];
-             //const operatorPrecedence = {'e': 3, '*': 2, '/': 2, '+': 1, '-': 1};
+
              function getPrecedence(operator) {
                  switch (operator) {
                      case 'e': return 3;
@@ -164,7 +180,6 @@
                      case '-': result.push(a - b); break;
                      case '*': result.push(a * b); break;
                      case '/': result.push(a / b); break;
-                     case 'e': result.push(Math.pow(2.7181, a - b)); break;
                  }
              }
 
@@ -215,7 +230,9 @@
 
          function Main(newExpr) {
              const Expr = cleaningInput(newExpr);
-             const tokens = exprTokens(Expr);
+             let tokens = exprTokens(Expr);
+
+             tokens = applyE(tokens);
 
              const bracketExpr = tokens.includes('(') || tokens.includes(')') ? solveBrackets(tokens) : tokens;
              const lastToken = bracketExpr[bracketExpr.length - 1];
